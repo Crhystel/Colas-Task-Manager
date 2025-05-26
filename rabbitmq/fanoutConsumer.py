@@ -1,7 +1,7 @@
 import pika
 from config import settings
 
-def startConsuming():
+def startFanoutConsumer():
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=settings.RABBITMQ_HOST,
@@ -18,6 +18,5 @@ def startConsuming():
         print(f"[Fanout] Mensaje recibido: {body.decode()}")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    print("[*] Esperando anuncios. Ctrl+C para salir.")
+    print("[*] Esperando anuncios generales (fanout). Ctrl+C para salir.")
     channel.start_consuming()
-    

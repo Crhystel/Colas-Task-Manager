@@ -18,5 +18,5 @@ def startDirectConsumer(usuario):
         print(f"[Direct] {usuario} recibió tarea: {body.decode()}")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    print(f"[*] {usuario} esperando tareas directas...")
+    print(f"[*] {usuario} esperando tareas directas.")
     channel.start_consuming()

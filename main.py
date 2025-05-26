@@ -1,113 +1,71 @@
-from models.user import User
-from models.group import Group
-from models.role import Role
-from models.task import Task
-from services.authorization import login
+from rabbitmq.messageService import MessageService
+from rabbitmq.fanoutProducer import sendAnuncio
+from rabbitmq.directProducer import sendTarea
+from rabbitmq.topicProducer import sendProyecto
 
-# Datos simulados
-users = []
-groups = []
-tasks = []
+def login():
+    print("=== Login ===")
+    usuario = input("Usuario: ").strip()
+    rol = input("Rol (admin/profesor/estudiante): ").strip().lower()
+    grupo = input("Grupo (grupo1/grupo2/...): ").strip().lower()
+    return usuario, rol, grupo
 
-# Crear primer admin por defecto
-admin_user = User("admin","123admin",Role.ADMIN,"ADMIN GROUP")
-users.append(admin_user)
+def main():
+    msg_service = MessageService()
 
-def crear_usuario():
-    username = input("Nombre de usuario: ")
-    password = input("Contraseña: ")
-    print("Roles disponibles:", ", ".join(Role.list_roles()))
-    role = input("Rol: ")
-    group_name = input("Grupo: ")
+    usuario, rol, grupo = login()
+    msg_service.start_for_user(usuario, rol, grupo)
 
-    group = next((g for g in groups if g.name == group_name), None)
-    if not group:
-        group = Group(group_name)
-        groups.append(group)
+    print(f"\nBienvenido {usuario}! Rol: {rol}, Grupo: {grupo}\n")
 
-    user = User(username, password, role, group.name)
-    users.append(user)
-    group.add_user(user)
-    print("Usuario creado con éxito.")
-
-def crear_tarea(logged_user):
-    title = input("Título de la tarea: ")
-    description = input("Descripción: ")
-
-    if logged_user.role == Role.ADMIN:
-        assigned_to = input("Asignar a (username): ")
-    else:
-        assigned_to = logged_user.username
-
-    if any(u.username == assigned_to for u in users):
-        task = Task(title, description, assigned_to)
-        tasks.append(task)
-        print("Tarea creada y asignada.")
-    else:
-        print("Usuario no encontrado.")
-
-def ver_tareas(logged_user):
-    if logged_user.role == Role.ADMIN:
-        for task in tasks:
-            print(task)
-    else:
-        for task in tasks:
-            if task.assigned_to == logged_user.username:
-                print(task)
-
-def ver_usuarios():
-    for user in users:
-        print(user)
-
-def menu_admin():
     while True:
-        print("\n--- Menú ADMIN ---")
-        print("1. Crear usuario")
-        print("2. Crear tarea")
-        print("3. Ver tareas")
-        print("4. Ver usuarios")
-        print("5. Salir")
+        if rol == "admin":
+            print("1. Crear usuario (simulado)")
+            print("2. Enviar anuncio general")
+            print("3. Asignar tarea a usuario")
+            print("4. Publicar proyecto por grupo/rol")
+            print("0. Salir")
 
-        opcion = input("Opción: ")
-        if opcion == "1":
-            crear_usuario()
-        elif opcion == "2":
-            crear_tarea(logged_user=admin_user)
-        elif opcion == "3":
-            ver_tareas(logged_user=admin_user)
-        elif opcion == "4":
-            ver_usuarios()
-        elif opcion == "5":
-            break
+            opcion = input("Seleccione opción: ")
+
+            match opcion:
+                case "1":
+                    print("[Simulación] Crear usuario no implementado en este ejemplo.")
+                case "2":
+                    msg = input("Mensaje anuncio general: ")
+                    send_anuncio(msg)
+                case "3":
+                    dest_usuario = input("Usuario destinatario: ")
+                    tarea = input("Mensaje tarea: ")
+                    send_tarea(dest_usuario, tarea)
+                case "4":
+                    routing_key = input("Routing key (rol.grupo): ")
+                    proyecto = input("Mensaje proyecto: ")
+                    send_proyecto(routing_key, proyecto)
+                case "0":
+                    print("Saliendo...")
+                    msg_service.stop_all()
+                    break
+                case _:
+                    print("Opción inválida.")
+
         else:
-            print("Opción inválida.")
+            print("1. Enviar tarea a usuario")
+            print("0. Salir")
 
-def menu_usuario(logged_user):
-    while True:
-        print(f"\n--- Menú ({logged_user.role}) ---")
-        print("1. Crear tarea")
-        print("2. Ver mis tareas")
-        print("3. Salir")
+            opcion = input("Seleccione opción: ")
 
-        opcion = input("Opción: ")
-        if opcion == "1":
-            crear_tarea(logged_user)
-        elif opcion == "2":
-            ver_tareas(logged_user)
-        elif opcion == "3":
-            break
-        else:
-            print("Opción inválida.")
-
-def menu_principal():
-    while True:
-        print("\n=== LOGIN ===")
-        user = login(users)
-        if user:
-            if user.role == Role.ADMIN:
-                menu_admin()
-            else:
-                menu_usuario(user)
+            match opcion:
+                case "1":
+                    dest_usuario = input("Usuario destinatario: ")
+                    tarea = input("Mensaje tarea: ")
+                    send_tarea(dest_usuario, tarea)
+                case "0":
+                    print("Saliendo...")
+                    msg_service.stop_all()
+                    break
+                case _:
+                    print("Opción inválida.")
 
 if __name__ == "__main__":
-    menu_principal()
+    main()
