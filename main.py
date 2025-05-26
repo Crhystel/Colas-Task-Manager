@@ -14,7 +14,7 @@ def main():
     msg_service = MessageService()
 
     usuario, rol, grupo = login()
-    msg_service.start_for_user(usuario, rol, grupo)
+    msg_service.startForUser(usuario, rol, grupo)
 
     print(f"\nBienvenido {usuario}! Rol: {rol}, Grupo: {grupo}\n")
 
@@ -33,18 +33,18 @@ def main():
                     print("[Simulación] Crear usuario no implementado en este ejemplo.")
                 case "2":
                     msg = input("Mensaje anuncio general: ")
-                    send_anuncio(msg)
+                    sendAnuncio(msg)
                 case "3":
                     dest_usuario = input("Usuario destinatario: ")
                     tarea = input("Mensaje tarea: ")
-                    send_tarea(dest_usuario, tarea)
+                    sendTarea(dest_usuario, tarea)
                 case "4":
                     routing_key = input("Routing key (rol.grupo): ")
                     proyecto = input("Mensaje proyecto: ")
-                    send_proyecto(routing_key, proyecto)
+                    sendProyecto(routing_key, proyecto)
                 case "0":
                     print("Saliendo...")
-                    msg_service.stop_all()
+                    msg_service.stopAll()
                     break
                 case _:
                     print("Opción inválida.")
@@ -59,10 +59,10 @@ def main():
                 case "1":
                     dest_usuario = input("Usuario destinatario: ")
                     tarea = input("Mensaje tarea: ")
-                    send_tarea(dest_usuario, tarea)
+                    sendTarea(dest_usuario, tarea)
                 case "0":
                     print("Saliendo...")
-                    msg_service.stop_all()
+                    msg_service.stopAll()
                     break
                 case _:
                     print("Opción inválida.")
