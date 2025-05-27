@@ -26,7 +26,7 @@ def startDirectConsumer(usuario):
     def callback(ch, method, properties, body):
         mensaje = body.decode()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[Direct] {usuario} recibió tarea.")
+        print(f"\n[Direct] {usuario} recibió tarea.\n")
 
         with open(os.path.join(taskDir, f"{usuario}.txt"), "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {mensaje}\n")
