@@ -10,5 +10,11 @@
         "password": "123",
         "role": "estudiante",
         "group": "grupo3"
+    },
+    {
+        "username": "Alfonso",
+        "password": "456",
+        "role": "profesor",
+        "group": "grupo2"
     }
 ]
