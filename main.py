@@ -103,7 +103,7 @@ def menu(user):
                 case _:
                     print("Opción inválida.\n")
 
-        else:
+        elif user["role"]=="estudiante":
             print("1. Enviar tarea a usuario")
             print("0. Cerrar sesión")
 
@@ -121,6 +121,28 @@ def menu(user):
                     return
                 case _:
                     print("Opción inválida.\n")
+        else:
+            if user["role"]=="profesor":
+                print("1. Asignar tarea a estudiante")
+                print("0. Cerrar sesión")
+                opcion=input("Seleccione una opción: ")
+                match opcion:
+                    case "1":
+                        destUsuario = input("Estudiante destinatario: ")
+                        titulo = input("Título de la tarea: ")
+                        contenido = input("Descripción de la tarea: ")
+                        mensaje = json.dumps({
+                            "titulo": titulo,
+                            "contenido": contenido
+                        })
+                        sendTarea(destUsuario, mensaje)
+                        print("Tarea asignada.\n")
+                    case "0":
+                        print("Cerrando sesión...\n")
+                        msgService.stopAll()
+                        return
+                    case _:
+                        print("Opción inválida.\n")
 
 def main():
     while True:
