@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-RABBITMQ_HOST = 'rabbitmq'  
+RABBITMQ_HOST = 'localhost'  
 RABBITMQ_PORT = 5672
 
 RABBITMQ_USER = os.getenv('RABBITMQ_DEFAULT_USER')
