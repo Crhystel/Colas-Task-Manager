@@ -1,5 +1,6 @@
 import pika
 from config import settings
+import json
 
 def sendTarea(usuario, mensaje):
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
@@ -10,6 +11,10 @@ def sendTarea(usuario, mensaje):
     channel = connection.channel()
 
     channel.exchange_declare(exchange=settings.EXCHANGE_DIRECT, exchange_type='direct')
-    channel.basic_publish(exchange=settings.EXCHANGE_DIRECT, routing_key=usuario, body=mensaje.encode())
+    data={
+        "titulo":"Tarea Automática",
+        "contenido":mensaje
+    }
+    channel.basic_publish(exchange=settings.EXCHANGE_DIRECT, routing_key=usuario, body=mensaje.encode(),properties=pika.BasicProperties(content_type='application/json'))
     print(f"[x] Tarea enviada a {usuario}: {mensaje}")
     connection.close()

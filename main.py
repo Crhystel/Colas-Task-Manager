@@ -84,8 +84,12 @@ def menu(user):
                     print("Anuncio enviado.\n")
                 case "4":
                     destUsuario = input("Usuario destinatario: ")
-                    tarea = input("Mensaje tarea: ")
-                    sendTarea(destUsuario, tarea)
+                    titulo = input("Título de la tarea: ")
+                    contenido = input("Mensaje de la tarea: ")
+                    mensaje = json.dumps({
+                    "titulo": titulo,
+                    "contenido": contenido})
+                    sendTarea(destUsuario, mensaje)
                     print("Tarea enviada.\n")
                 case "5":
                     routingKey = input("Routing key (rol.grupo): ")

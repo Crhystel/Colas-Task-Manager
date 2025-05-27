@@ -2,6 +2,7 @@ import pika
 from config import settings
 import os
 from datetime import datetime
+import json
 
 def startDirectConsumer(usuario):
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
@@ -24,14 +25,15 @@ def startDirectConsumer(usuario):
     os.makedirs(taskDir, exist_ok=True)
 
     def callback(ch, method, properties, body):
-        mensaje = body.decode()
+        msgJson = body.decode()
+        data=json.loads(msgJson)
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\n[Direct] {usuario} recibió tarea.\n")
 
         with open(os.path.join(taskDir, f"{usuario}.txt"), "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {mensaje}\n")
+            f.write(f"[{timestamp}] Tarea: {data['titulo']} - {data['contenido']}\n")
         with open(os.path.join(logsDir, f"direct_{usuario}.log"), "a", encoding="utf-8") as log:
-            log.write(f"[{timestamp}] Tarea recibida: {mensaje}\n")
+            log.write(f"[{timestamp}] Tarea recibida: {msgJson}\n")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
