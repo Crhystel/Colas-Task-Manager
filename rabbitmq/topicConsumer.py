@@ -11,8 +11,8 @@ def startTopicConsumer(binding_key):
     ))
     channel = connection.channel()
 
-    channel.exchange_declare(exchange=settings.EXCHANGE_TOPIC, exchange_type='topic')
-    result = channel.queue_declare(queue='', exclusive=True)
+    channel.exchange_declare(exchange=settings.EXCHANGE_TOPIC, exchange_type='topic', durable=True)
+    result = channel.queue_declare(queue=f"topic_{binding_key.replace('.', '_')}", durable=True)
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.EXCHANGE_TOPIC, queue=queue_name, routing_key=binding_key)
 
