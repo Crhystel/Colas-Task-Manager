@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 
 def startDirectConsumer(usuario):
+    # Conexión a RabbitMQ con autenticación
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=settings.RABBITMQ_HOST,
@@ -12,21 +13,23 @@ def startDirectConsumer(usuario):
     ))
     channel = connection.channel()
 
+    # Configuración del exchange y la cola
     channel.exchange_declare(exchange=settings.EXCHANGE_DIRECT, exchange_type='direct')
     result = channel.queue_declare(queue=f"direct_{usuario}", durable=True)
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.EXCHANGE_DIRECT, queue=queue_name, routing_key=usuario)
 
+    # Directorios para tareas y logs
     baseDir = os.path.dirname(os.path.abspath(__file__))
     logsDir = os.path.join(baseDir, "..", "logs")
     taskDir = os.path.join(baseDir, "..", "tasks")
-
     os.makedirs(logsDir, exist_ok=True)
     os.makedirs(taskDir, exist_ok=True)
 
+    # Acción al recibir mensaje
     def callback(ch, method, properties, body):
         msgJson = body.decode()
-        data=json.loads(msgJson)
+        data = json.loads(msgJson)
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"\n[Direct] {usuario} recibió tarea.\n")
 

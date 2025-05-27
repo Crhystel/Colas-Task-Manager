@@ -7,16 +7,19 @@ from rabbitmq.topicProducer import sendProyecto
 
 USERS_FILE = "users.json"
 
+# Carga los usuarios registrados desde el archivo
 def cargarUsuarios():
     if not os.path.exists(USERS_FILE):
         return []
     with open(USERS_FILE, "r") as f:
         return json.load(f)
 
+# Guarda los usuarios en el archivo
 def guardarUsuarios(usuarios):
     with open(USERS_FILE, "w") as f:
         json.dump(usuarios, f, indent=4)
 
+# Inicia sesión si las credenciales coinciden
 def login():
     usuarios = cargarUsuarios()
     print("=== Login ===")
@@ -30,6 +33,7 @@ def login():
     print("Credenciales incorrectas.\n")
     return None
 
+# Crea un nuevo usuario (solo admins)
 def crearUsuario():
     print("=== Crear nuevo usuario ===")
     username = input("Nuevo usuario: ").strip()
@@ -51,6 +55,7 @@ def crearUsuario():
     guardarUsuarios(usuarios)
     print("Usuario creado correctamente.\n")
 
+# Muestra todos los usuarios
 def verUsuarios():
     usuarios = cargarUsuarios()
     print("=== Lista de usuarios ===")
@@ -58,6 +63,7 @@ def verUsuarios():
         print(f" {user['username']} | Rol: {user['role']} | Grupo: {user['group']}")
     print()
 
+# Menú según el rol del usuario
 def menu(user):
     msgService = MessageService()
     msgService.startForUser(user["username"], user["role"], user["group"])
@@ -70,7 +76,6 @@ def menu(user):
             print("4. Asignar tarea a usuario")
             print("5. Publicar proyecto por grupo/rol")
             print("0. Cerrar sesión")
-
             opcion = input("Seleccione opción: ")
 
             match opcion:
@@ -86,9 +91,7 @@ def menu(user):
                     destUsuario = input("Usuario destinatario: ")
                     titulo = input("Título de la tarea: ")
                     contenido = input("Mensaje de la tarea: ")
-                    mensaje = json.dumps({
-                    "titulo": titulo,
-                    "contenido": contenido})
+                    mensaje = json.dumps({"titulo": titulo, "contenido": contenido})
                     sendTarea(destUsuario, mensaje)
                     print("Tarea enviada.\n")
                 case "5":
@@ -103,10 +106,9 @@ def menu(user):
                 case _:
                     print("Opción inválida.\n")
 
-        elif user["role"]=="estudiante":
+        elif user["role"] == "estudiante":
             print("1. Enviar tarea a usuario")
             print("0. Cerrar sesión")
-
             opcion = input("Seleccione opción: ")
 
             match opcion:
@@ -121,29 +123,28 @@ def menu(user):
                     return
                 case _:
                     print("Opción inválida.\n")
-        else:
-            if user["role"]=="profesor":
-                print("1. Asignar tarea a estudiante")
-                print("0. Cerrar sesión")
-                opcion=input("Seleccione una opción: ")
-                match opcion:
-                    case "1":
-                        destUsuario = input("Estudiante destinatario: ")
-                        titulo = input("Título de la tarea: ")
-                        contenido = input("Descripción de la tarea: ")
-                        mensaje = json.dumps({
-                            "titulo": titulo,
-                            "contenido": contenido
-                        })
-                        sendTarea(destUsuario, mensaje)
-                        print("Tarea asignada.\n")
-                    case "0":
-                        print("Cerrando sesión...\n")
-                        msgService.stopAll()
-                        return
-                    case _:
-                        print("Opción inválida.\n")
 
+        elif user["role"] == "profesor":
+            print("1. Asignar tarea a estudiante")
+            print("0. Cerrar sesión")
+            opcion = input("Seleccione una opción: ")
+
+            match opcion:
+                case "1":
+                    destUsuario = input("Estudiante destinatario: ")
+                    titulo = input("Título de la tarea: ")
+                    contenido = input("Descripción de la tarea: ")
+                    mensaje = json.dumps({"titulo": titulo, "contenido": contenido})
+                    sendTarea(destUsuario, mensaje)
+                    print("Tarea asignada.\n")
+                case "0":
+                    print("Cerrando sesión...\n")
+                    msgService.stopAll()
+                    return
+                case _:
+                    print("Opción inválida.\n")
+
+# Punto de entrada de la app
 def main():
     while True:
         user = None

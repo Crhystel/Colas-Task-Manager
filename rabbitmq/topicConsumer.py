@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 def startTopicConsumer(binding_key):
+    # Conexión a RabbitMQ
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         host=settings.RABBITMQ_HOST,
@@ -11,23 +12,24 @@ def startTopicConsumer(binding_key):
     ))
     channel = connection.channel()
 
+    # Configuración del exchange topic y cola con binding_key
     channel.exchange_declare(exchange=settings.EXCHANGE_TOPIC, exchange_type='topic', durable=True)
     result = channel.queue_declare(queue=f"topic_{binding_key.replace('.', '_')}", durable=True)
-    queue_name = result.method.queue
-    channel.queue_bind(exchange=settings.EXCHANGE_TOPIC, queue=queue_name, routing_key=binding_key)
+    queueName = result.method.queue
+    channel.queue_bind(exchange=settings.EXCHANGE_TOPIC, queue=queueName, routing_key=binding_key)
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    logs_dir = os.path.join(base_dir, "..", "logs")
-    os.makedirs(logs_dir, exist_ok=True)
+    logsDir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "logs")
+    os.makedirs(logsDir, exist_ok=True)
 
+    # Guarda el mensaje en un archivo específico según binding_key
     def callback(ch, method, properties, body):
         mensaje = body.decode()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[Topic] Mensaje recibido para '{binding_key}'.")
 
         filename = f"topic_{binding_key.replace('.', '_')}.log"
-        with open(os.path.join(logs_dir, filename), "a", encoding="utf-8") as log:
+        with open(os.path.join(logsDir, filename), "a", encoding="utf-8") as log:
             log.write(f"[{timestamp}] {mensaje}\n")
 
-    channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
