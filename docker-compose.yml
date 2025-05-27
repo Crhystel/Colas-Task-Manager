@@ -3,7 +3,7 @@ version: '3.9'
 services:
   rabbitmq:
     image: rabbitmq:3.12-management
-    container_name: rabbitmq
+    container_name: rabbitmqTaskManager
     ports:
       - "5672:5672"      # puerto para apps
       - "15672:15672"    # puerto para panel web
