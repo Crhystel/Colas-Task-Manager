@@ -3,7 +3,6 @@ class Task:
         self.title = title
         self.description = description
         self.assigned_to = assigned_to  
-        ##
 
     def __str__(self):
         return f"{self.title} -> {self.assigned_to}: {self.description}"
