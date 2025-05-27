@@ -1,4 +1,2 @@
-[2025-05-27 01:05:10] fff
-[2025-05-27 01:11:54] aaaa
-[2025-05-27 02:17:15] Tarea: Tarea 1 - Realizar
-[2025-05-27 02:28:42] Tarea: Tarea 2 - ddd
+[2025-05-27 14:07:29] Tarea: Tarea 1 - Haz la tarea
+[2025-05-27 14:08:52] Tarea: Tarea 2 - Tareassss

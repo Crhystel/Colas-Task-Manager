@@ -28,15 +28,25 @@ def startDirectConsumer(usuario):
 
     # Acción al recibir mensaje
     def callback(ch, method, properties, body):
-        msgJson = body.decode()
-        data = json.loads(msgJson)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"\n[Direct] {usuario} recibió tarea.\n")
+        try:
+            msgJson = body.decode()
+            data = json.loads(msgJson)
 
-        with open(os.path.join(taskDir, f"{usuario}.txt"), "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] Tarea: {data['titulo']} - {data['contenido']}\n")
-        with open(os.path.join(logsDir, f"direct_{usuario}.log"), "a", encoding="utf-8") as log:
-            log.write(f"[{timestamp}] Tarea recibida: {msgJson}\n")
+            titulo = data.get("titulo", "Sin título")
+            contenido = data.get("contenido", "Sin contenido")
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"\n[Direct] {usuario} recibió tarea.\n")
+
+            with open(os.path.join(taskDir, f"{usuario}.txt"), "a", encoding="utf-8") as f:
+                f.write(f"[{timestamp}] Tarea: {titulo} - {contenido}\n")
+            with open(os.path.join(logsDir, f"direct_{usuario}.log"), "a", encoding="utf-8") as log:
+                log.write(f"[{timestamp}] Tarea recibida: {msgJson}\n")
+
+        except Exception as e:
+            print(f"[!] Error procesando mensaje para {usuario}: {e}")
+            with open(os.path.join(logsDir, f"direct_{usuario}.log"), "a", encoding="utf-8") as log:
+                log.write(f"[{datetime.now()}] Error: {e} - Raw: {body}\n")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()

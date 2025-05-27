@@ -1,2 +1,2 @@
-[2025-05-27 01:13:41] Tarea recibida: Hskndskihdd
-[2025-05-27 01:14:13] Tarea recibida: dnkbv
+[2025-05-27 14:09:16.386561] Error: Expecting value: line 1 column 1 (char 0) - Raw: b'Ya envi\xc3\xa9'
+[2025-05-27 14:15:02] Tarea recibida: {"titulo": "Mensaje de Crhystel", "contenido": "Ya profeee"}

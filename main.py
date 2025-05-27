@@ -107,22 +107,40 @@ def menu(user):
                     print("Opción inválida.\n")
 
         elif user["role"] == "estudiante":
-            print("1. Enviar tarea a usuario")
-            print("0. Cerrar sesión")
-            opcion = input("Seleccione opción: ")
+            while True:
+                print("1. Ver mis tareas asignadas")
+                print("2. Enviar mensaje a otro usuario")
+                print("0. Cerrar sesión")
+                opcion = input("Seleccione opción: ")
 
-            match opcion:
-                case "1":
-                    destUsuario = input("Usuario destinatario: ")
-                    tarea = input("Mensaje tarea: ")
-                    sendTarea(destUsuario, tarea)
-                    print("Tarea enviada.\n")
-                case "0":
-                    print("Cerrando sesión...\n")
-                    msgService.stopAll()
-                    return
-                case _:
-                    print("Opción inválida.\n")
+                match opcion:
+                    case "1":
+                        ruta_tareas = f"tasks/{user['username']}.txt"
+                        if os.path.exists(ruta_tareas):
+                            print(f"\n=== Tareas de {user['username']} ===")
+                            with open(ruta_tareas, "r", encoding="utf-8") as f:
+                                contenido = f.read()
+                                print(contenido if contenido else "No tienes tareas registradas.\n")
+                        else:
+                            print("\nNo tienes tareas registradas.\n")
+
+                    case "2":
+                        destinatario = input("Usuario destinatario: ").strip()
+                        mensaje = input("Mensaje que deseas enviar: ").strip()
+                        cuerpo = json.dumps({
+                            "titulo": f"Mensaje de {user['username']}",
+                            "contenido": mensaje
+                        })
+                        sendTarea(destinatario, cuerpo)
+                        print("Mensaje enviado.\n")
+
+                    case "0":
+                        print("Cerrando sesión...\n")
+                        msgService.stopAll()
+                        return
+
+                    case _:
+                        print("Opción inválida.\n")
 
         elif user["role"] == "profesor":
             print("1. Asignar tarea a estudiante")

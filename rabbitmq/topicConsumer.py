@@ -23,13 +23,19 @@ def startTopicConsumer(binding_key):
 
     # Guarda el mensaje en un archivo específico según binding_key
     def callback(ch, method, properties, body):
-        mensaje = body.decode()
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[Topic] Mensaje recibido para '{binding_key}'.")
+        try:
+            mensaje = body.decode()
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[Topic] Mensaje recibido para '{binding_key}': {mensaje}")
 
-        filename = f"topic_{binding_key.replace('.', '_')}.log"
-        with open(os.path.join(logsDir, filename), "a", encoding="utf-8") as log:
-            log.write(f"[{timestamp}] {mensaje}\n")
+            filename = f"topic_{binding_key.replace('.', '_')}.log"
+            with open(os.path.join(logsDir, filename), "a", encoding="utf-8") as log:
+                log.write(f"[{timestamp}] {mensaje}\n")
+
+        except Exception as e:
+            print(f"[!] Error al procesar mensaje de topic '{binding_key}': {e}")
+            with open(os.path.join(logsDir, f"topic_{binding_key.replace('.', '_')}.log"), "a", encoding="utf-8") as log:
+                log.write(f"[{datetime.now()}] Error: {e} - Raw: {body}\n")
 
     channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
