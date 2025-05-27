@@ -16,16 +16,18 @@ def startTopicConsumer(binding_key):
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.EXCHANGE_TOPIC, queue=queue_name, routing_key=binding_key)
 
-    os.makedirs('logs', exist_ok=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(base_dir, "..", "logs")
+    os.makedirs(logs_dir, exist_ok=True)
 
     def callback(ch, method, properties, body):
         mensaje = body.decode()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[Topic] ({binding_key}) recibió: {mensaje}")
+        print(f"[Topic] Mensaje recibido para '{binding_key}'.")
 
-        with open(f"logs/topic_{binding_key.replace('.', '_')}.log", "a") as log:
+        filename = f"topic_{binding_key.replace('.', '_')}.log"
+        with open(os.path.join(logs_dir, filename), "a", encoding="utf-8") as log:
             log.write(f"[{timestamp}] {mensaje}\n")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    print(f"[*] Esperando mensajes para patrón '{binding_key}'")
     channel.start_consuming()

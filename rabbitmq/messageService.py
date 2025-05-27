@@ -10,7 +10,7 @@ class MessageService:
         self.processes = []
 
     def startForUser(self, username, role, group):
-        print(f"[+] Iniciando consumidores para {username} ({role}.{group})")
+        print(f"[+] Iniciando consumidores para {username} ({role}.{group})\n")
         
         # Consumidor directo (mensajes individuales)
         p1 = multiprocessing.Process(target=startDirectConsumer, args=(username,))

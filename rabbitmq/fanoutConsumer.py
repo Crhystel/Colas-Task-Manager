@@ -16,16 +16,17 @@ def startFanoutConsumer():
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.EXCHANGE_FANOUT, queue=queue_name)
 
-    os.makedirs('logs', exist_ok=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    logs_dir = os.path.join(base_dir, "..", "logs")
+    os.makedirs(logs_dir, exist_ok=True)
 
     def callback(ch, method, properties, body):
         mensaje = body.decode()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[Fanout] Mensaje recibido: {mensaje}")
+        print("[Fanout] Mensaje recibido.")
 
-        with open("logs/fanout.log", "a") as log:
+        with open(os.path.join(logs_dir, "fanout.log"), "a", encoding="utf-8") as log:
             log.write(f"[{timestamp}] {mensaje}\n")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    print("[*] Esperando anuncios generales (fanout). Ctrl+C para salir.")
     channel.start_consuming()

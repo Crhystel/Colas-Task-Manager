@@ -4,23 +4,23 @@ class TaskManager:
     def __init__(self):
         self.tasks = []
 
-    def crear_tarea(self, title, description, assigned_to):
+    def crearTarea(self, title, description, assigned_to):
         task = Task(title, description, assigned_to)
         self.tasks.append(task)
         print(f"Tarea '{title}' creada para {assigned_to}")
         return task
 
-    def obtener_tareas_por_usuario(self, username):
+    def obtenerTareasPorUsuario(self, username):
         return [t for t in self.tasks if t.assigned_to == username]
 
-    def obtener_todas_tareas(self):
+    def obtenerTodasTareas(self):
         return self.tasks
 
-    def eliminar_tarea(self, title):
+    def eliminarTarea(self, title):
         self.tasks = [t for t in self.tasks if t.title != title]
         print(f"Tarea '{title}' eliminada.")
 
-    def reasignar_tarea(self, title, nuevo_usuario):
+    def reasignarTarea(self, title, nuevo_usuario):
         for task in self.tasks:
             if task.title == title:
                 task.assigned_to = nuevo_usuario

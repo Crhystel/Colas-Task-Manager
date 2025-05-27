@@ -12,23 +12,26 @@ def startDirectConsumer(usuario):
     channel = connection.channel()
 
     channel.exchange_declare(exchange=settings.EXCHANGE_DIRECT, exchange_type='direct')
-    result = channel.queue_declare(queue='', exclusive=True)
+    result = channel.queue_declare(queue=f"direct_{usuario}", durable=True)
     queue_name = result.method.queue
     channel.queue_bind(exchange=settings.EXCHANGE_DIRECT, queue=queue_name, routing_key=usuario)
 
-    os.makedirs('logs', exist_ok=True)
-    os.makedirs('tareas', exist_ok=True)
+    baseDir = os.path.dirname(os.path.abspath(__file__))
+    logsDir = os.path.join(baseDir, "..", "logs")
+    taskDir = os.path.join(baseDir, "..", "tasks")
+
+    os.makedirs(logsDir, exist_ok=True)
+    os.makedirs(taskDir, exist_ok=True)
 
     def callback(ch, method, properties, body):
         mensaje = body.decode()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[Direct] {usuario} recibió tarea: {mensaje}")
+        print(f"[Direct] {usuario} recibió tarea.")
 
-        with open(f"tareas/{usuario}.txt", "a") as f:
+        with open(os.path.join(taskDir, f"{usuario}.txt"), "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] {mensaje}\n")
-        with open(f"logs/direct_{usuario}.log", "a") as log:
+        with open(os.path.join(logsDir, f"direct_{usuario}.log"), "a", encoding="utf-8") as log:
             log.write(f"[{timestamp}] Tarea recibida: {mensaje}\n")
 
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
-    print(f"[*] {usuario} esperando tareas directas.")
     channel.start_consuming()
