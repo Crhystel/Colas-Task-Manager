@@ -2,9 +2,13 @@ import json
 import os
 from rabbitmq.messageService import MessageService
 from rabbitmq.fanoutProducer import sendAnuncio
-from rabbitmq.directProducer import sendTarea
+from azureMicrosoft.directProducer import sendTarea
 from rabbitmq.topicProducer import sendProyecto
+from dotenv import load_dotenv
 
+load_dotenv()
+print("SENDER:", os.getenv("AZURE_SERVICE_BUS_SENDER"))
+print("RECEIVER:", os.getenv("AZURE_SERVICE_BUS_RECEIVER"))
 USERS_FILE = "users.json"
 
 # Carga los usuarios registrados desde el archivo

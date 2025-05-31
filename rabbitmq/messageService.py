@@ -1,5 +1,5 @@
 import multiprocessing
-from rabbitmq.directConsumer import startDirectConsumer
+from azureMicrosoft.directConsumer import startDirectConsumer
 from rabbitmq.topicConsumer import startTopicConsumer
 from rabbitmq.fanoutConsumer import startFanoutConsumer 
 
