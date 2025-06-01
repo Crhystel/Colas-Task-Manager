@@ -1,5 +1,5 @@
 import multiprocessing
-from azureMicrosoft.directConsumer import startDirectConsumer
+from azureMicrosoft.directConsumer import startAzureTaskConsumer
 from rabbitmq.topicConsumer import startTopicConsumer
 from rabbitmq.fanoutConsumer import startFanoutConsumer 
 
@@ -11,7 +11,7 @@ class MessageService:
         print(f"[+] Iniciando consumidores para {username} ({role}.{group})\n")
         
         # Consumidor directo: recibe tareas individuales
-        p1 = multiprocessing.Process(target=startDirectConsumer, args=(username,))
+        p1 = multiprocessing.Process(target=startAzureTaskConsumer, args=(username,))
         p1.start()
         self.processes.append(p1)
 
