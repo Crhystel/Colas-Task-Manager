@@ -1,9 +1,9 @@
 import json
 import os
-from messageService import MessageService # Gestiona los procesos de los consumidores
+from services.messageService import MessageService # Gestiona los procesos de los consumidores
 from rabbitmq.fanoutProducer import sendAnnouncement # Envía anuncios generales (RabbitMQ)
 from rabbitmq.topicProducer import sendProyect # Envía proyectos por tema (RabbitMQ)
-from messageProducer import sendTaskToQueues # Envía tareas directas (Azure)
+from services.messageProducer import sendTaskToQueues # Envía tareas directas (Azure)
 
 USERS_FILE = "users.json" # Archivo para almacenar datos de usuarios
 
