@@ -18,3 +18,7 @@
     http://localhost:15672
 
 ### La aplicación se ejecuta en main
+## Cambios Realizados
+- Ahora los exchange direct los recibe y envia Microsoft Azure, se activan cuando alguien asigna un deber y cuando el estudiante envia un mensaje a un usuario
+- Existen "logs" que muestran las tareas o mensajes enviados a diferentes usuarios para comprobar que funcionan las colas, estos funcionan tanto para RabbitMQ como para los exchange de Azure
+- Nota: los mensajes se demoran en ser consumidos por los usuarios destinatarios, pero funcionan

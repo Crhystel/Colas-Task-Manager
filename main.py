@@ -74,9 +74,9 @@ def menu(currentUser):
         if currentUser["role"] == "admin":
             print("1. Crear usuario")
             print("2. Ver todos los usuarios")
-            print("3. Enviar anuncio general (RabbitMQ Fanout)")
-            print("4. Asignar tarea a usuario (Azure Queue)")
-            print("5. Publicar proyecto por grupo/rol (RabbitMQ Topic)")
+            print("3. Enviar anuncio general ")
+            print("4. Asignar tarea a usuario")
+            print("5. Publicar proyecto por grupo/rol")
             print("0. Cerrar sesión")
             option = input("Seleccione opción: ") 
 
@@ -113,7 +113,7 @@ def menu(currentUser):
             # Lo mantendré como estaba en tu código original, pero podría simplificarse.
             while True:
                 print("1. Ver mis tareas asignadas")
-                print("2. Enviar mensaje a otro usuario (Azure Queue)")
+                print("2. Enviar mensaje a otro usuario ")
                 print("0. Cerrar sesión")
                 option = input("Seleccione opción: ")
 
@@ -144,7 +144,7 @@ def menu(currentUser):
         
         # Menú para profesores
         elif currentUser["role"] == "profesor":
-            print("1. Asignar tarea a estudiante (Azure Queue)")
+            print("1. Asignar tarea a estudiante")
             print("0. Cerrar sesión")
             option = input("Seleccione una opción: ")
 

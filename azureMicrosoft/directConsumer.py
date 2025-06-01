@@ -45,7 +45,7 @@ def startAzureDirectConsumer(userNameForFile):
                             with open(taskFilePath, "a", encoding="utf-8") as f_task:
                                 f_task.write(f"[{timestamp}] Tarea (Azure): {data.get('titulo', 'Sin título')} - {data.get('contenido', 'Sin contenido')}\n")
                             with open(logFilePath, "a", encoding="utf-8") as f_log:
-                                f_log.write(f"[{timestamp}] Tarea recibida (Azure): {str(msg)}\n")
+                                f_log.write(f"[{timestamp}] Mensaje Recibido (Azure): {str(msg)}\n")
                             receiver.complete_message(msg) # Confirma y elimina el mensaje
                         
                         elif targetUser: # Mensaje para otro usuario, ignorar
