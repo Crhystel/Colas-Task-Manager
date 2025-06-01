@@ -17,8 +17,8 @@ def sendProyect(routing_key, mensaje):
     channel.basic_publish(
         exchange=settings.EXCHANGE_TOPIC,
         routing_key=routing_key,
-        body=mensaje,  # Quitamos .encode()
-        properties=pika.BasicProperties(delivery_mode=2)  # persistente
+        body=mensaje, 
+        properties=pika.BasicProperties(delivery_mode=2)
     )
     print(f"[x] Proyecto enviado a {routing_key}: {mensaje}")
     connection.close()

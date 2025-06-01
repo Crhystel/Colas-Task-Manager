@@ -1,27 +1,24 @@
 import json
-from azureMicrosoft.directProducer import sendAzureTask
+from azureMicrosoft.directProducer import sendAzureTask # Función para enviar mensajes a Azure
 
 def sendTaskToQueues(targetUserName, taskTitle, taskContent):
-    """
-   Sends a task message (direct) to Azure Service Bus.
-    """
-    # Prepare message for RabbitMQ (payload original)
-    rabbitMessagePayload = {"titulo": taskTitle, "contenido": taskContent}
-    rabbitMessageJson = json.dumps(rabbitMessagePayload)
+    """Prepara y envía un mensaje de tarea a Azure Service Bus."""
+
+    # (La sección para preparar rabbitMessagePayload no se usa si las tareas directas solo van a Azure)
+    # rabbitMessagePayload = {"titulo": taskTitle, "contenido": taskContent}
+    # rabbitMessageJson = json.dumps(rabbitMessagePayload)
     
-    
-    # Prepare message for Azure Service Bus (añadiendo targetUser para filtrado en el consumidor)
+    # Prepara el payload del mensaje para Azure Service Bus
     azureMessagePayload = {
         "titulo": taskTitle, 
         "contenido": taskContent,
-        "targetUser": targetUserName  # Crucial para que el consumidor de Azure sepa para quién es
+        "targetUser": targetUserName  # Necesario para el filtrado en el consumidor de Azure
     }
     azureMessageJson = json.dumps(azureMessagePayload)
 
-    # Send to Azure Service Bus
+    # Intenta enviar el mensaje a Azure
     try:
         print(f"Intentando enviar tarea a Azure Service Bus para {targetUserName}...")
         sendAzureTask(azureMessageJson)
-        # sendAzureTask imprime su propio mensaje de confirmación/error
     except Exception as e:
         print(f"[!] Error enviando tarea a Azure para {targetUserName}: {e}")

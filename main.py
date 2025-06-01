@@ -1,29 +1,25 @@
 import json
 import os
-from messageService import MessageService# Asumiendo que está en la raíz o en PYTHONPATH
-from rabbitmq.fanoutProducer import sendAnnouncement # Se mantiene para RabbitMQ
-# from rabbitmq.directProducer import sendTarea # Ya no se usa directamente aquí, se usa el unificado
-from rabbitmq.topicProducer import sendProyect # Se mantiene para RabbitMQ
-from messageProducer import sendTaskToQueues # Nuevo productor unificado
+from messageService import MessageService # Gestiona los procesos de los consumidores
+from rabbitmq.fanoutProducer import sendAnnouncement # Envía anuncios generales (RabbitMQ)
+from rabbitmq.topicProducer import sendProyect # Envía proyectos por tema (RabbitMQ)
+from messageProducer import sendTaskToQueues # Envía tareas directas (Azure)
 
-# El resto de tus importaciones y funciones (cargarUsuarios, guardarUsuarios, login, crearUsuario, verUsuarios) se mantienen igual.
-# ... (tu código de cargarUsuarios, guardarUsuarios, login, crearUsuario, verUsuarios) ...
+USERS_FILE = "users.json" # Archivo para almacenar datos de usuarios
 
-USERS_FILE = "users.json"
-
-# Carga los usuarios registrados desde el archivo
+# Carga los usuarios registrados desde el archivo JSON
 def loadUser():
     if not os.path.exists(USERS_FILE):
-        return []
+        return [] # Retorna lista vacía si el archivo no existe
     with open(USERS_FILE, "r") as f:
         return json.load(f)
 
-# Guarda los usuarios en el archivo
+# Guarda la lista de usuarios en el archivo JSON
 def saveUser(users):
     with open(USERS_FILE, "w") as f:
-        json.dump(users, f, indent=4)
+        json.dump(users, f, indent=4) # indent=4 para formato legible
 
-# Inicia sesión si las credenciales coinciden
+# Valida las credenciales del usuario para iniciar sesión
 def login():
     usuarios = loadUser()
     print("=== Login ===")
@@ -33,11 +29,11 @@ def login():
     for user in usuarios:
         if user["username"] == username and user["password"] == password:
             print(f"\nBienvenido {user['username']}! Rol: {user['role']}, Grupo: {user['group']}\n")
-            return user
+            return user # Retorna el diccionario del usuario si las credenciales son correctas
     print("Credenciales incorrectas.\n")
-    return None
+    return None # Retorna None si el login falla
 
-# Crea un nuevo usuario (solo admins)
+# Permite crear un nuevo usuario y guardarlo
 def createUser():
     print("=== Crear nuevo usuario ===")
     username = input("Nuevo usuario: ").strip()
@@ -46,6 +42,7 @@ def createUser():
     group = input("Grupo (grupo1/grupo2/...): ").strip().lower()
 
     users = loadUser()
+    # Verifica si el usuario ya existe
     if any(u["username"] == username for u in users):
         print("El usuario ya existe.\n")
         return
@@ -59,7 +56,7 @@ def createUser():
     saveUser(users)
     print("Usuario creado correctamente.\n")
 
-# Muestra todos los usuarios
+# Muestra la lista de todos los usuarios registrados
 def seeUsers():
     users = loadUser()
     print("=== Lista de usuarios ===")
@@ -67,64 +64,62 @@ def seeUsers():
         print(f" {user['username']} | Rol: {user['role']} | Grupo: {user['group']}")
     print()
 
-
-def menu(currentUser): # Cambiado a camelCase
-    msgService = MessageService()
-    # En MessageService, userName, userRole, userGroup ya son camelCase
-    msgService.startForUser(currentUser["username"], currentUser["role"], currentUser["group"])
+# Menú principal de la aplicación, varía según el rol del usuario
+def menu(currentUser): 
+    msgService = MessageService() # Instancia el servicio de mensajería
+    msgService.startForUser(currentUser["username"], currentUser["role"], currentUser["group"]) # Inicia consumidores
 
     while True:
+        # Menú para administradores
         if currentUser["role"] == "admin":
             print("1. Crear usuario")
             print("2. Ver todos los usuarios")
-            print("3. Enviar anuncio general")
-            print("4. Asignar tarea a usuario")
-            print("5. Publicar proyecto por grupo/rol")
+            print("3. Enviar anuncio general (RabbitMQ Fanout)")
+            print("4. Asignar tarea a usuario (Azure Queue)")
+            print("5. Publicar proyecto por grupo/rol (RabbitMQ Topic)")
             print("0. Cerrar sesión")
-            option = input("Seleccione opción: ") # Cambiado a camelCase
+            option = input("Seleccione opción: ") 
 
             match option:
                 case "1":
                     createUser()
                 case "2":
                     seeUsers()
-                case "3":
+                case "3": # Enviar anuncio general
                     msg = input("Mensaje anuncio general: ")
-                    sendAnnouncement(msg) # Esto sigue siendo solo RabbitMQ
+                    sendAnnouncement(msg) 
                     print("Anuncio enviado.\n")
-                case "4":
-                    destUserName = input("Usuario destinatario: ") # Cambiado a camelCase
-                    taskTitle = input("Título de la tarea: ")    # Cambiado a camelCase
-                    taskContent = input("Mensaje de la tarea: ") # Cambiado a camelCase
-                    
-                    # Usar el nuevo productor unificado
-                    sendTaskToQueues(destUserName, taskTitle, taskContent)
+                case "4": # Asignar tarea directa
+                    destUserName = input("Usuario destinatario: ") 
+                    taskTitle = input("Título de la tarea: ")  
+                    taskContent = input("Mensaje de la tarea: ")
+                    sendTaskToQueues(destUserName, taskTitle, taskContent) # Envía a Azure
                     print("Solicitud de envío de tarea procesada.\n")
-                case "5":
+                case "5": # Publicar proyecto por tema
                     routingKey = input("Routing key (rol.grupo): ")
-                    projectMessage = input("Mensaje proyecto: ") # Cambiado a camelCase
-                    sendProyect(routingKey, projectMessage) # Esto sigue siendo solo RabbitMQ
+                    projectMessage = input("Mensaje proyecto: ") 
+                    sendProyect(routingKey, projectMessage) 
                     print("Proyecto enviado.\n")
-                case "0":
+                case "0": # Cerrar sesión
                     print("Cerrando sesión...\n")
-                    msgService.stopAll()
+                    msgService.stopAll() # Detiene todos los consumidores
                     return
                 case _:
                     print("Opción inválida.\n")
 
+        # Menú para estudiantes
         elif currentUser["role"] == "estudiante":
-            # ... (resto del menú de estudiante, actualizando las llamadas de envío de tareas) ...
+            # (El bucle while True interno para el estudiante es redundante si el menú se reimprime)
+            # Lo mantendré como estaba en tu código original, pero podría simplificarse.
             while True:
                 print("1. Ver mis tareas asignadas")
-                print("2. Enviar mensaje a otro usuario")
+                print("2. Enviar mensaje a otro usuario (Azure Queue)")
                 print("0. Cerrar sesión")
                 option = input("Seleccione opción: ")
 
                 match option:
-                    case "1":
-                        # La lógica de lectura de tareas se mantiene, leerá de los archivos
-                        # que ahora pueden ser poblados por RabbitMQ o Azure
-                        taskFilePath = f"tasks/{currentUser['username']}.txt" # Cambiado a camelCase
+                    case "1": # Ver tareas desde archivo
+                        taskFilePath = f"tasks/{currentUser['username']}.txt" 
                         if os.path.exists(taskFilePath):
                             print(f"\n=== Tareas de {currentUser['username']} ===")
                             with open(taskFilePath, "r", encoding="utf-8") as f:
@@ -133,52 +128,48 @@ def menu(currentUser): # Cambiado a camelCase
                         else:
                             print("\nNo tienes tareas registradas.\n")
 
-                    case "2":
-                        recipientUserName = input("Usuario destinatario: ").strip() # Cambiado a camelCase
-                        messageContent = input("Mensaje que deseas enviar: ").strip() # Cambiado a camelCase
-                        messageTitle = f"Mensaje de {currentUser['username']}" # Cambiado a camelCase
-                        
-                        # Usar el nuevo productor unificado
-                        sendTaskToQueues(recipientUserName, messageTitle, messageContent)
+                    case "2": # Enviar mensaje directo (tarea) a otro usuario
+                        recipientUserName = input("Usuario destinatario: ").strip() 
+                        messageContent = input("Mensaje que deseas enviar: ").strip() 
+                        messageTitle = f"Mensaje de {currentUser['username']}" 
+                        sendTaskToQueues(recipientUserName, messageTitle, messageContent) # Envía a Azure
                         print("Solicitud de envío de mensaje procesada.\n")
 
-                    case "0":
+                    case "0": # Cerrar sesión
                         print("Cerrando sesión...\n")
                         msgService.stopAll()
                         return
-
                     case _:
                         print("Opción inválida.\n")
         
+        # Menú para profesores
         elif currentUser["role"] == "profesor":
-            # ... (resto del menú de profesor, actualizando las llamadas de envío de tareas) ...
-            print("1. Asignar tarea a estudiante")
+            print("1. Asignar tarea a estudiante (Azure Queue)")
             print("0. Cerrar sesión")
             option = input("Seleccione una opción: ")
 
             match option:
-                case "1":
-                    destUserName = input("Estudiante destinatario: ") # Cambiado a camelCase
-                    taskTitle = input("Título de la tarea: ") # Cambiado a camelCase
-                    taskContent = input("Descripción de la tarea: ") # Cambiado a camelCase
-                    
-                    # Usar el nuevo productor unificado
-                    sendTaskToQueues(destUserName, taskTitle, taskContent)
+                case "1": # Asignar tarea a un estudiante
+                    destUserName = input("Estudiante destinatario: ") 
+                    taskTitle = input("Título de la tarea: ") 
+                    taskContent = input("Descripción de la tarea: ") 
+                    sendTaskToQueues(destUserName, taskTitle, taskContent) # Envía a Azure
                     print("Solicitud de asignación de tarea procesada.\n")
-                case "0":
+                case "0": # Cerrar sesión
                     print("Cerrando sesión...\n")
                     msgService.stopAll()
                     return
                 case _:
                     print("Opción inválida.\n")
 
-# Punto de entrada de la app
+# Función principal que maneja el flujo de login y menú
 def main():
     while True:
-        currentUser = None # Cambiado a camelCase
+        currentUser = None
+        # Bucle hasta que el login sea exitoso
         while not currentUser:
             currentUser = login()
-        menu(currentUser)
+        menu(currentUser) # Pasa al menú del usuario logueado
 
 if __name__ == "__main__":
-    main()
+    main() # Punto de entrada de la aplicación
