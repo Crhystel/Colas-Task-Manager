@@ -1,7 +1,7 @@
 import pika
 from config import settings
 
-def sendAnnouncement(mensaje):
+def sendAnuncio(mensaje):
     # Conexión a RabbitMQ
     credentials = pika.PlainCredentials(settings.RABBITMQ_USER, settings.RABBITMQ_PASSWORD)
     connection = pika.BlockingConnection(pika.ConnectionParameters(

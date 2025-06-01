@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 
@@ -19,8 +18,3 @@ EXCHANGE_TOPIC = 'exchange_proyectos'
 QUEUE_ANUNCIOS = 'cola_anuncios'
 QUEUE_TAREAS = 'cola_tareas'
 QUEUE_PROYECTOS = 'cola_proyectos'
-
-# Azure Service Bus Settings
-AZURE_SERVICE_BUS_SENDER_CONNECTION_STRING = os.getenv("AZURE_SERVICE_BUS_SENDER")
-AZURE_SERVICE_BUS_RECEIVER_CONNECTION_STRING = os.getenv("AZURE_SERVICE_BUS_RECEIVER")
-AZURE_QUEUE_NAME = os.getenv("AZURE_QUEUE_NAME", "tareas")
